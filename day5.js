@@ -81,7 +81,7 @@ function validateForm() {
         try {
             const raw = localStorage.getItem('projects');
             const projects = raw ? JSON.parse(raw) : [];
-            projects.unshift(formData);
+            projects.push(formData);
             localStorage.setItem('projects', JSON.stringify(projects));
         } catch (err) {
             console.error('Error saving to localStorage', err);
@@ -137,3 +137,4 @@ function renderProjectCard(p, index) {
 document.addEventListener('DOMContentLoaded', function() {
     loadSavedProjects();
 });
+
