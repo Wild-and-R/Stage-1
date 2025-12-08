@@ -13,11 +13,12 @@ function validateForm() {
     const endDate = document.querySelector("input[placeholder='End Date']").value.trim();
     const description = document.getElementById("ProjectDescription").value.trim();
     const fileInput = document.getElementById("formFile");
-    const technologies = [];
-    document.querySelectorAll("input[type='checkbox']:checked").forEach(checkbox => {
-        const label = document.querySelector(`label[for='${checkbox.id}']`);
-        technologies.push(label ? label.textContent.trim() : checkbox.id);
-    });
+    const technologies = Array.from(document.querySelectorAll("input[type='checkbox']:checked"))
+        .map(checkbox => {
+            const label = document.querySelector(`label[for='${checkbox.id}']`);
+            return label ? label.textContent.trim() : checkbox.id;
+        });
+
 
     if (!projectName) {
         alert("Project Name is required");
@@ -128,13 +129,31 @@ function renderProjectCard(p, index) {
                 <div><strong>Technologies:</strong> ${techs}</div>
                 <div>
                     <a class="button" href="Project-Detail.html?i=${index}">Detail</a>
+                    <a class="button" href="Edit-Project.html?i=${index}">Edit</a>
+                    <button class="button" onclick="deleteProject(${index})">Delete</button>
                 </div>
             </div>
         </div>
     `;
 }
 
+// Delete dari Local Storage dan refresh tampilan
+function deleteProject(index) {
+    if (!confirm('Are you sure you want to delete this project?')) return;
+    try {
+        const raw = localStorage.getItem('projects');
+        const projects = raw ? JSON.parse(raw) : [];
+        if (index >= 0 && index < projects.length) {
+            projects.splice(index, 1);
+            localStorage.setItem('projects', JSON.stringify(projects));
+        }
+    } catch (err) {
+        console.error('Error deleting project', err);
+    }
+    if (typeof loadSavedProjects === 'function') loadSavedProjects();
+}
 document.addEventListener('DOMContentLoaded', function() {
     loadSavedProjects();
 });
+
 
