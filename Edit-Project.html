@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">LOGO</a>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+  <button class="button" onclick="Cancel()">Cancel</button>
+  </div>
+  </div>
+</nav>
+<h1><b>EDIT PROJECT</b></h1>
+<form id="editForm" onsubmit="return saveEditedProject(event)">
+  <div class="mb-3">
+    <label for="InputProjectName1" class="form-label">Project Name</label>
+    <input type="text" class="form-control" id="InputProjectName1" aria-describedby="ProjectName">
+  </div>
+  <div class="input-group mb-3">
+    <input type="text" class="form-control" placeholder="Start Date" aria-label="Start Date">
+    <span class="input-group-text">-</span>
+    <input type="text" class="form-control" placeholder="End Date" aria-label="End Date">
+  </div>
+  <div class="mb-3">
+    <label for="ProjectDescription" class="form-label">Description</label>
+    <textarea class="form-control" id="ProjectDescription" rows="3"></textarea>
+  </div>
+  <p>Technologies Used:</p>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" id="NodeJs" value="option1">
+    <label class="form-check-label" for="NodeJs">Node Js</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" id="NextJs" value="option2">
+    <label class="form-check-label" for="NextJs">Next Js</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" id="ReactJs" value="option3">
+    <label class="form-check-label" for="ReactJs">React Js</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" id="TypeScript" value="option4">
+    <label class="form-check-label" for="TypeScript">TypeScript</label>
+  </div>
+  <div class="mb-3">
+    <label for="formFile" class="form-label">Upload Image (no upload if you don't want to edit image)</label>
+    <input class="form-control" type="file" id="formFile">
+  </div>
+  <div class="mb-3">
+    <img id="currentImage" src="" alt="Current image" style="max-width:200px; display:none;" />
+  </div>
+  <button type="submit" class="button">Save</button>
+</form>
+<script src="Edit-Project.js"></script>
+</body>
+</html>
