@@ -15,11 +15,21 @@
   </nav>
 
   <div class="card">
-    <div id="projectDetail">
+    <div class="card-body">
+      {{#if project}}
+        <h3>{{project.projectname}}</h3>
+        <p><strong>Start:</strong> {{project.startdate}} <strong>End:</strong> {{project.enddate}}</p>
+        <p>{{project.description}}</p>
+        {{#if project.image}}
+          <img src="/project-image/{{project.id}}" alt="Project Image" style="max-width:400px;max-height:300px;border-radius:6px;object-fit:cover;" />
+        {{/if}}
+        {{#if project.technologies}}
+          <p><strong>Technologies:</strong> {{project.technologies}}</p>
+        {{/if}}
+      {{else}}
+        <p>Project not found.</p>
+      {{/if}}
     </div>
   </div>
-
-  <script src="../assets/js/project-detail.js">
-  </script>
 </body>
 </html>
