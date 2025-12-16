@@ -1,6 +1,9 @@
 import express from 'express';
 import { Client } from 'pg';
 import multer from 'multer';
+import bcrypt from 'bcrypt';
+import flash from 'express-flash';
+import session from 'express-session';
  
 const client = new Client({
   user: 'postgres',
@@ -20,7 +23,13 @@ app.set('views', 'src/views');
 
 app.use("/assets",express.static("src/assets"));
 app.use(express.json()); 
-app.use(express.urlencoded({ extended: false })); 
+app.use(express.urlencoded({ extended: false }));
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true,
+}))
+app.use(flash()); 
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -28,14 +37,22 @@ app.get('/', home);
 app.get('/project',project);
 app.post('/project', upload.single('image'), handleproject);
 app.get('/project-detail/:id', projectdetail);
+app.get('/login', login);
+app.post('/login', handlelogin);
+app.get('/register', register);
+app.post('/register', handleregister);
 
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
 
-function home(req, res) {
-  res.render("index")
+async function home(req, res) {
+  let userdata;
+  if (req.session.user) {
+    userdata = req.session.user;
+  }
+  res.render("index", { userdata });
 }
 
 async function project(req, res) {
@@ -104,3 +121,48 @@ app.post('/project-delete/:id', async (req, res) => {
     res.status(500).send('Database error: ' + err.message);
   }
 });
+
+async function login(req, res) {
+  res.render("login", { messages: req.flash('error') });
+}
+
+ async function register(req, res) {
+  res.render("register", { messages: req.flash('error') });
+}
+
+async function handleregister(req, res) {
+  let { username, email, password } = req.body;
+  const existingUser = await client.query('SELECT * FROM users WHERE email = $1', [email]);
+  if (existingUser.rows.length > 0) {
+    req.flash('error', 'Email already registered');
+    return res.redirect('/register');
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  try {
+    await client.query(
+      'INSERT INTO users (username, email, password) VALUES ($1, $2, $3)',
+      [username, email, hashedPassword]
+    );
+    res.redirect('/login');
+  } catch (err) {
+    res.status(500).send('Database error: ' + err.message);
+  }
+}
+
+async function handlelogin(req, res) {
+  let { email, password } = req.body;
+  const userResult = await client.query('SELECT * FROM users WHERE email = $1', [email]);
+  if (userResult.rows.length === 0) {
+    req.flash('error', 'Invalid email or password');
+    return res.redirect('/login');
+  }
+  const user = userResult.rows[0];
+  const passwordMatch = await bcrypt.compare(password, user.password);
+  if (!passwordMatch) {
+    req.flash('error', 'Invalid email or password');
+    return res.redirect('/login');
+  }
+  req.session.user = user.username;
+  res.redirect('/');
+}
+
