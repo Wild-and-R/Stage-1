@@ -19,9 +19,23 @@
           <a class="nav-link" href="/project">My Project</a>
         </li>
       </ul>
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+      <a class="nav-link" href="/login">Login</a>
+        </li>
+        <li class="nav-item">
+      <a class="nav-link" href="/register">Register</a>
+        </li>
+      </ul>
     </div>
   </div>
-</nav>      
+</nav>
+{{#if userdata}}
+  <h1>Welcome, {{userdata}}!</h1>
+{{else}}
+  <h1>Welcome to the Home Page!</h1>
+{{/if}}
+
 <div class="card">
     <h2><b>Hello World!!</b></h2> 
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque eu erat augue. Suspendisse felis est, fringilla at placerat a, aliquam at dolor. Ut blandit libero in nisl sodales feugiat. Mauris quam magna, venenatis ac commodo a, convallis iaculis nisl. Aenean tincidunt arcu arcu, gravida accumsan dolor iaculis ut. Aenean nunc orci, viverra pretium tincidunt et, dictum eu mi. Maecenas sit amet ex a enim accumsan euismod eu sed dolor. Suspendisse malesuada id ante vel vulputate.
