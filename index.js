@@ -1,3 +1,4 @@
+import hbs from 'hbs';
 import express from 'express';
 import { Client } from 'pg';
 import multer from 'multer';
@@ -29,7 +30,14 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
 }))
-app.use(flash()); 
+app.use(flash());
+hbs.registerHelper('includes', function (array, value) {
+  if (!array) return false;
+  return array.includes(value);
+});
+hbs.registerHelper('formatDate', function (date) {
+  return new Date(date).toISOString().split('T')[0];
+});
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -37,11 +45,25 @@ app.get('/', home);
 app.get('/project',project);
 app.post('/project', upload.single('image'), handleproject);
 app.get('/project-detail/:id', projectdetail);
+app.get('/project-edit/:id', projectedit);
+app.post('/project-edit/:id', upload.single('image'), handleprojectedit);
 app.get('/login', login);
 app.post('/login', handlelogin);
 app.get('/register', register);
 app.post('/register', handleregister);
-
+app.get('/project-image/:id', async (req, res) => {
+  const id = req.params.id;
+  try {
+    const result = await client.query('SELECT image FROM project WHERE id = $1', [id]);
+    if (result.rows.length === 0 || !result.rows[0].image) {
+      return res.status(404).send('Image not found');
+    }
+    res.set('Content-Type', 'image/jpeg');
+    res.send(result.rows[0].image);
+  } catch (err) {
+    res.status(500).send('Database error: ' + err.message);
+  }
+});
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
@@ -83,20 +105,6 @@ async function handleproject(req, res) {
   } catch (err) {
     res.status(500).send('Database error: ' + err.message);
   }
-  
-app.get('/project-image/:id', async (req, res) => {
-  const id = req.params.id;
-  try {
-    const result = await client.query('SELECT image FROM project WHERE id = $1', [id]);
-    if (result.rows.length === 0 || !result.rows[0].image) {
-      return res.status(404).send('Image not found');
-    }
-    res.set('Content-Type', 'image/jpeg');
-    res.send(result.rows[0].image);
-  } catch (err) {
-    res.status(500).send('Database error: ' + err.message);
-  }
-});
 }
 
 async function projectdetail(req, res) {
@@ -111,6 +119,92 @@ async function projectdetail(req, res) {
     res.status(500).send("Database error: " + err.message);
   }
 }
+
+async function projectedit(req, res) {
+  const id = req.params.id;
+
+  try {
+    const result = await client.query(
+      'SELECT * FROM project WHERE id = $1',
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).send('Project not found');
+    }
+
+    const project = result.rows[0];
+    // Format dates suitable for input fields
+    project.startdate = project.startdate.toISOString().split('T')[0];
+    project.enddate = project.enddate.toISOString().split('T')[0];
+    // Convert technologies string to array
+    project.technologies = project.technologies
+      ? project.technologies.split(', ')
+      : [];
+    // Render edit form with project data
+    res.render('project-edit', {
+      project,
+      techList: ['NodeJs', 'NextJs', 'ReactJs', 'TypeScript']
+    });
+
+  } catch (err) {
+    res.status(500).send('Database error: ' + err.message);
+  }
+}
+
+
+async function handleprojectedit(req, res) {
+  const id = req.params.id;
+  let { projectname, startdate, enddate, description, technologies } = req.body;
+
+  // Handle technologies as array
+  if (!Array.isArray(technologies)) {
+    technologies = technologies ? [technologies] : [];
+  }
+  const techString = technologies.join(', ');
+
+  try {
+    // Get old image if no new image is uploaded
+    const oldData = await client.query(
+      'SELECT image FROM project WHERE id = $1',
+      [id]
+    );
+
+    if (oldData.rows.length === 0) {
+      return res.status(404).send('Project not found');
+    }
+
+    const imageBuffer = req.file
+      ? req.file.buffer
+      : oldData.rows[0].image;
+
+    await client.query(
+      `UPDATE project
+       SET projectname = $1,
+           startdate = $2,
+           enddate = $3,
+           description = $4,
+           technologies = $5,
+           image = $6
+       WHERE id = $7`,
+      [
+        projectname,
+        startdate,
+        enddate,
+        description,
+        techString,
+        imageBuffer,
+        id
+      ]
+    );
+
+    res.redirect('/project');
+
+  } catch (err) {
+    res.status(500).send('Database error: ' + err.message);
+  }
+}
+
 
 app.post('/project-delete/:id', async (req, res) => {
   const id = req.params.id;
