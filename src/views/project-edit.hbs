@@ -1,0 +1,61 @@
+<html>
+<head>
+<link rel="stylesheet" href="style.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">LOGO</a>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      </div>
+    </div>
+  </nav>
+
+<form action="/project-edit/{{project.id}}" method="POST" enctype="multipart/form-data">
+  <div class="mb-3">
+    <label class="form-label">Project Name</label>
+    <input type="text" class="form-control" name="projectname"
+      value="{{project.projectname}}" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Start Date</label>
+    <input type="date" class="form-control" name="startdate"
+      value="{{project.startdate}}" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">End Date</label>
+    <input type="date" class="form-control" name="enddate"
+      value="{{project.enddate}}" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Description</label>
+    <textarea class="form-control" name="description" rows="3" required>{{project.description}}</textarea>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Technologies Used</label><br>
+
+{{#each techList}}
+  <div class="form-check form-check-inline">
+    <input class="form-check-input"
+           type="checkbox"
+           name="technologies"
+           value="{{this}}"
+           {{#if (includes ../project.technologies this)}}checked{{/if}}>
+    <label class="form-check-label">{{this}}</label>
+  </div>
+{{/each}}
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Project Image</label>
+    <input class="form-control" type="file" name="image">
+  </div>
+
+  <button type="submit" class="button btn-success">Update Project</button>
+</form>
